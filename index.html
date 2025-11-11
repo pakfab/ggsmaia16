@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qi'ar Qi'er Pak Fab</title>
+  <style>
+    /* ======== GAYA FORM ======== */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f3f4f6;
+      font-family: "Inter", sans-serif;
+    }
+
+    .form_container {
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      padding: 40px 30px;
+      background-color: #ffffff;
+      box-shadow: 0px 106px 42px rgba(0, 0, 0, 0.01),
+        0px 59px 36px rgba(0, 0, 0, 0.05),
+        0px 26px 26px rgba(0, 0, 0, 0.09),
+        0px 7px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 11px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #212121;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #8B8E98;
+      text-align: center;
+    }
+
+    .input_container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input_label {
+      font-size: 0.75rem;
+      color: #8B8E98;
+      font-weight: 600;
+    }
+
+    .input_field {
+      width: 100%;
+      height: 40px;
+      padding: 0 10px;
+      border-radius: 7px;
+      outline: none;
+      border: 1px solid #e5e5e5;
+      transition: all 0.3s;
+    }
+
+    .input_field:focus {
+      border: 1px solid transparent;
+      box-shadow: 0px 0px 0px 2px #115dfc;
+    }
+
+    .file_field {
+      border: 1px dashed #ccc;
+      padding: 10px;
+      border-radius: 7px;
+      text-align: center;
+      color: #666;
+      cursor: pointer;
+    }
+
+    .btn {
+      width: 100%;
+      height: 40px;
+      border: 0;
+      border-radius: 7px;
+      background: #115dfc;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #0d46bf;
+    }
+
+    .mode_switch {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .result_container {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .qr_image {
+      width: 150px;
+      height: 150px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      margin-bottom: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* ======== LOADER DARI UIVERSE.IO ======== */
+    .loader-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 180px;
+      height: 180px;
+      font-family: "Inter", sans-serif;
+      font-size: 1.2em;
+      font-weight: 300;
+      color: #333;
+      border-radius: 50%;
+      background-color: transparent;
+      user-select: none;
+    }
+
+    .loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background-color: transparent;
+      animation: loader-rotate 2s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes loader-rotate {
+      0% {
+        transform: rotate(90deg);
+        box-shadow:
+          0 10px 20px 0 #fff inset,
+          0 20px 30px 0 #ad5fff inset,
+          0 60px 60px 0 #471eec inset;
+      }
+      50% {
+        transform: rotate(270deg);
+        box-shadow:
+          0 10px 20px 0 #fff inset,
+          0 20px 10px 0 #d60a47 inset,
+          0 40px 60px 0 #311e80 inset;
+      }
+      100% {
+        transform: rotate(450deg);
+        box-shadow:
+          0 10px 20px 0 #fff inset,
+          0 20px 30px 0 #ad5fff inset,
+          0 60px 60px 0 #471eec inset;
+      }
+    }
+
+    .loader-letter {
+      display: inline-block;
+      opacity: 0.4;
+      transform: translateY(0);
+      animation: loader-letter-anim 2s infinite;
+      z-index: 1;
+      border-radius: 50ch;
+      border: none;
+    }
+
+    .loader-letter:nth-child(1) { animation-delay: 0s; }
+    .loader-letter:nth-child(2) { animation-delay: 0.1s; }
+    .loader-letter:nth-child(3) { animation-delay: 0.2s; }
+    .loader-letter:nth-child(4) { animation-delay: 0.3s; }
+    .loader-letter:nth-child(5) { animation-delay: 0.4s; }
+    .loader-letter:nth-child(6) { animation-delay: 0.5s; }
+    .loader-letter:nth-child(7) { animation-delay: 0.6s; }
+    .loader-letter:nth-child(8) { animation-delay: 0.7s; }
+
+    @keyframes loader-letter-anim {
+      0%, 100% {
+        opacity: 0.4;
+        transform: translateY(0);
+      }
+      20% {
+        opacity: 1;
+        transform: scale(1.15);
+      }
+      40% {
+        opacity: 0.7;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <form class="form_container" id="qrForm" onsubmit="return false;">
+    <div class="title_container">
+      <p class="title">Qi'ar Qi'er Pak Fab</p>
+      <span class="subtitle">Bisa bikin url jadi QR. Bisa untuk kegiatan, bisa untuk bikin QR Absensi</span>
+    </div>
+
+    <div class="mode_switch">
+      <label><input type="radio" name="mode" value="single" checked> Single</label>
+      <label><input type="radio" name="mode" value="bulk"> Link banyak</label>
+    </div>
+
+    <div id="singleInput" class="input_container">
+      <label class="input_label">Masukkan Link</label>
+      <input type="text" id="linkInput" class="input_field" placeholder="https://contoh.com">
+    </div>
+
+    <div id="bulkInput" class="input_container hidden">
+      <label class="input_label">Upload File Teks (satu link per baris)</label>
+      <input type="file" id="fileInput" accept=".txt" class="file_field">
+    </div>
+
+    <button class="btn" id="generateBtn">Generate QR</button>
+
+    <!-- Loader -->
+    <div id="loader" class="loader-wrapper hidden">
+      <span class="loader-letter">T</span>
+      <span class="loader-letter">u</span>
+      <span class="loader-letter">n</span>
+      <span class="loader-letter">g</span>
+      <span class="loader-letter">g</span>
+      <span class="loader-letter">u</span>
+      <span class="loader-letter">i</span>
+      <span class="loader-letter">n</span>
+      <div class="loader"></div>
+    </div>
+
+    <div class="result_container hidden" id="resultBox">
+      <img id="qrImage" class="qr_image" src="">
+      <br>
+      <a id="downloadLink" href="#" download="qr.png">Unduh PNG</a>
+    </div>
+  </form>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <script>
+    const modeRadios = document.querySelectorAll("input[name='mode']");
+    const singleInput = document.getElementById("singleInput");
+    const bulkInput = document.getElementById("bulkInput");
+    const loader = document.getElementById("loader");
+
+    modeRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        if (radio.value === "single") {
+          singleInput.classList.remove("hidden");
+          bulkInput.classList.add("hidden");
+        } else {
+          singleInput.classList.add("hidden");
+          bulkInput.classList.remove("hidden");
+        }
+      });
+    });
+
+    document.getElementById("generateBtn").addEventListener("click", async () => {
+      const mode = document.querySelector("input[name='mode']:checked").value;
+      loader.classList.remove("hidden");
+
+      if (mode === "single") {
+        const link = document.getElementById("linkInput").value.trim();
+        if (!link) { loader.classList.add("hidden"); return alert("Linknya taruh sini dulu! Paste aja!"); }
+
+        const encoded = encodeURIComponent(link);
+        const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encoded}`;
+        const qrImg = document.getElementById("qrImage");
+        qrImg.src = qrURL;
+
+        document.getElementById("resultBox").classList.remove("hidden");
+        document.getElementById("downloadLink").href = qrURL;
+
+        loader.classList.add("hidden");
+
+      } else {
+        const file = document.getElementById("fileInput").files[0];
+        if (!file) { loader.classList.add("hidden"); return alert("Pilih file .txt berisi daftar link."); }
+
+        const text = await file.text();
+        const links = text.split(/\r?\n/).filter(l => l.trim() !== "");
+        const zip = new JSZip();
+
+        for (const link of links) {
+          const encoded = encodeURIComponent(link.trim());
+          const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encoded}`;
+          const response = await fetch(qrURL);
+          const blob = await response.blob();
+          const filename = `qr_${Math.random().toString(36).substring(2, 8)}.png`;
+          zip.file(filename, blob);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        saveAs(zipBlob, "qr_bulk.zip");
+
+        loader.classList.add("hidden");
+        alert("✅ ZIP berhasil dibuat dan diunduh! Makasih Pak Fab!!");
+      }
+    });
+  </script>
+</body>
+</html>
