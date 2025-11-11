@@ -163,11 +163,11 @@
   </style>
 </head>
 <body>
-  <h1>🔗 QR Code Generator</h1>
-  <p>Masukkan 1 link atau beberapa link (pisahkan baris baru)</p>
+  <h1>QR Code Generator e Pak Fab</h1>
+  <p>Kalo mau bikin 1 QR, ketik atau paste linknya. Kalo mau bikin banyak, bikin daftar yg dipisah 1 baris 1 link. hasilnya nanti jadi satu .ZIP</p>
 
   <textarea id="linkInput" rows="6" placeholder="https://contoh.com atau banyak link..."></textarea><br>
-  <button onclick="generateQR()">Buatkan QR</button>
+  <button onclick="generateQR()">GAAAASSSSSS Bikinin QR!</button>
 
   <div class="qr-container" id="qrContainer"></div>
 
@@ -240,7 +240,7 @@
           saveAs(zipBlob, `QR_Batch_${Date.now()}.zip`);
         }
       } catch (e) {
-        alert("Terjadi kesalahan: " + e.message);
+        alert("Lho apa ini: " + e.message);
       } finally {
         overlay.classList.remove("show");
       }
