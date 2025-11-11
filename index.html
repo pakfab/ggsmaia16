@@ -1,108 +1,178 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <title>Pembuat QR Pak Fab</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
     body {
-      display: flex; justify-content: center; align-items: center;
-      height: 100vh; background: #f3f4f6;
       font-family: "Inter", sans-serif;
+      background: #0b0c10;
+      color: white;
+      text-align: center;
+      padding: 30px;
     }
-    .form_container {
-      width: 380px; display: flex; flex-direction: column; align-items: center;
-      gap: 15px; padding: 40px 30px; background-color: #ffffff;
-      box-shadow: 0px 106px 42px rgba(0, 0, 0, 0.01),
-                  0px 59px 36px rgba(0, 0, 0, 0.05),
-                  0px 26px 26px rgba(0, 0, 0, 0.09),
-                  0px 7px 15px rgba(0, 0, 0, 0.1);
-      border-radius: 11px;
-    }
-    .title { font-size: 1.25rem; font-weight: 700; color: #212121; }
-    .subtitle { font-size: 0.8rem; color: #8B8E98; text-align: center; }
-    .input_container { width: 100%; display: flex; flex-direction: column; gap: 6px; }
-    .input_label { font-size: 0.75rem; color: #8B8E98; font-weight: 600; }
-    .input_field {
-      width: 100%; height: 40px; padding: 0 10px; border-radius: 7px;
-      border: 1px solid #e5e5e5; outline: none; transition: all 0.3s;
-    }
-    .input_field:focus { border: 1px solid transparent; box-shadow: 0 0 0 2px #115dfc; }
-    .file_field {
-      border: 1px dashed #ccc; padding: 10px; border-radius: 7px;
-      text-align: center; color: #666; cursor: pointer;
-    }
-    .btn {
-      width: 100%; height: 40px; border: 0; border-radius: 7px;
-      background: #115dfc; color: white; font-weight: 600; cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn:hover { background: #0d46bf; }
-    .mode_switch { display: flex; gap: 10px; margin-bottom: 10px; }
-    .result_container { margin-top: 20px; text-align: center; }
-    .qr_image { width: 150px; height: 150px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 10px; }
-    .hidden { display: none; }
 
-    /* Loader */
+    h1 {
+      margin-bottom: 10px;
+      color: #61dafb;
+    }
+
+    textarea, input {
+      width: 90%;
+      max-width: 500px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #471eec;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #6c3ffe;
+    }
+
+    .qr-container img {
+      margin-top: 20px;
+      width: 250px;
+      border: 3px solid #61dafb;
+      border-radius: 10px;
+    }
+
+    /* Loader overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s, opacity 0.3s ease;
+      z-index: 9999;
+    }
+
+    .overlay.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Loader style */
     .loader-wrapper {
-      display: none; flex-direction: column; align-items: center; justify-content: center;
-      margin-top: 15px; width: 180px; height: 180px; position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 180px;
+      height: 180px;
+      font-size: 1.2em;
+      font-weight: 300;
+      color: white;
+      border-radius: 50%;
+      background-color: transparent;
+      user-select: none;
+      position: relative;
     }
+
     .loader {
-      position: absolute; top: 0; left: 0; width: 100%; aspect-ratio: 1 / 1;
-      border-radius: 50%; animation: loader-rotate 2s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background-color: transparent;
+      animation: loader-rotate 2s linear infinite;
+      z-index: 0;
     }
+
     @keyframes loader-rotate {
-      0% { transform: rotate(90deg);
-        box-shadow: 0 10px 20px 0 #fff inset, 0 20px 30px 0 #ad5fff inset, 0 60px 60px 0 #471eec inset; }
-      50% { transform: rotate(270deg);
-        box-shadow: 0 10px 20px 0 #fff inset, 0 20px 10px 0 #d60a47 inset, 0 40px 60px 0 #311e80 inset; }
-      100% { transform: rotate(450deg);
-        box-shadow: 0 10px 20px 0 #fff inset, 0 20px 30px 0 #ad5fff inset, 0 60px 60px 0 #471eec inset; }
+      0% {
+        transform: rotate(90deg);
+        box-shadow:
+          0 10px 20px 0 #fff inset,
+          0 20px 30px 0 #ad5fff inset,
+          0 60px 60px 0 #471eec inset;
+      }
+      50% {
+        transform: rotate(270deg);
+        box-shadow:
+          0 10px 20px 0 #fff inset,
+          0 20px 10px 0 #d60a47 inset,
+          0 40px 60px 0 #311e80 inset;
+      }
+      100% {
+        transform: rotate(450deg);
+        box-shadow:
+          0 10px 20px 0 #fff inset,
+          0 20px 30px 0 #ad5fff inset,
+          0 60px 60px 0 #471eec inset;
+      }
     }
+
     .loader-letter {
-      display: inline-block; opacity: 0.4; transform: translateY(0);
-      animation: loader-letter-anim 2s infinite; font-weight: 600;
+      display: inline-block;
+      opacity: 0.4;
+      transform: translateY(0);
+      animation: loader-letter-anim 2s infinite;
+      z-index: 1;
     }
-    .loader-letter:nth-child(1){animation-delay:0s}
-    .loader-letter:nth-child(2){animation-delay:0.1s}
-    .loader-letter:nth-child(3){animation-delay:0.2s}
-    .loader-letter:nth-child(4){animation-delay:0.3s}
-    .loader-letter:nth-child(5){animation-delay:0.4s}
-    .loader-letter:nth-child(6){animation-delay:0.5s}
-    .loader-letter:nth-child(7){animation-delay:0.6s}
-    .loader-letter:nth-child(8){animation-delay:0.7s}
+
     @keyframes loader-letter-anim {
-      0%,100%{opacity:0.4;transform:translateY(0);}
-      20%{opacity:1;transform:scale(1.15);}
-      40%{opacity:0.7;transform:translateY(0);}
+      0%, 100% {
+        opacity: 0.4;
+        transform: translateY(0);
+      }
+      20% {
+        opacity: 1;
+        transform: scale(1.15);
+      }
+      40% {
+        opacity: 0.7;
+        transform: translateY(0);
+      }
     }
+
+    .loader-letter:nth-child(1){animation-delay:0s;}
+    .loader-letter:nth-child(2){animation-delay:0.1s;}
+    .loader-letter:nth-child(3){animation-delay:0.2s;}
+    .loader-letter:nth-child(4){animation-delay:0.3s;}
+    .loader-letter:nth-child(5){animation-delay:0.4s;}
+    .loader-letter:nth-child(6){animation-delay:0.5s;}
+    .loader-letter:nth-child(7){animation-delay:0.6s;}
+    .loader-letter:nth-child(8){animation-delay:0.7s;}
+    .loader-letter:nth-child(9){animation-delay:0.8s;}
+
   </style>
 </head>
 <body>
-  <form class="form_container" id="qrForm" onsubmit="return false;">
-    <p class="title">Pembuat QR Pak Fab</p>
-    <span class="subtitle">Bisa bikin URL jadi QR tanpa iklan! Cocok untuk absensi atau kegiatan.</span>
+  <h1>🔗 QR Code Generator</h1>
+  <p>Masukkan 1 link atau beberapa link (pisahkan baris baru)</p>
 
-    <div class="mode_switch">
-      <label><input type="radio" name="mode" value="single" checked> Single</label>
-      <label><input type="radio" name="mode" value="bulk"> Banyak</label>
-    </div>
+  <textarea id="linkInput" rows="6" placeholder="https://contoh.com atau banyak link..."></textarea><br>
+  <button onclick="generateQR()">Buatkan QR</button>
 
-    <div id="singleInput" class="input_container">
-      <label class="input_label">Masukkan Link</label>
-      <input type="text" id="linkInput" class="input_field" placeholder="https://contoh.com">
-    </div>
+  <div class="qr-container" id="qrContainer"></div>
 
-    <div id="bulkInput" class="input_container hidden">
-      <label class="input_label">Upload File Teks (satu link per baris)</label>
-      <input type="file" id="fileInput" accept=".txt" class="file_field">
-    </div>
-
-    <button class="btn" id="generateBtn">Buatkan QR-nya</button>
-
-    <div id="loader" class="loader-wrapper">
+  <!-- Loader overlay -->
+  <div class="overlay" id="overlay">
+    <div class="loader-wrapper">
       <span class="loader-letter">T</span>
       <span class="loader-letter">u</span>
       <span class="loader-letter">n</span>
@@ -113,101 +183,67 @@
       <span class="loader-letter">n</span>
       <div class="loader"></div>
     </div>
-
-    <div class="result_container hidden" id="resultBox">
-      <img id="qrImage" class="qr_image" src="">
-      <br>
-      <a id="downloadLink" href="#" download="qr.png" class="btn" style="width:auto; padding:8px 12px;">⬇️ Unduh QR</a>
-    </div>
-  </form>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  </div>
 
   <script>
-    const modeRadios = document.querySelectorAll("input[name='mode']");
-    const singleInput = document.getElementById("singleInput");
-    const bulkInput = document.getElementById("bulkInput");
-    const loader = document.getElementById("loader");
-    const resultBox = document.getElementById("resultBox");
+    async function generateQR() {
+      const overlay = document.getElementById("overlay");
+      const input = document.getElementById("linkInput").value.trim();
+      const qrContainer = document.getElementById("qrContainer");
+      qrContainer.innerHTML = "";
 
-    // Ganti input sesuai mode
-    modeRadios.forEach(radio => {
-      radio.addEventListener("change", () => {
-        if (radio.value === "single") {
-          singleInput.classList.remove("hidden");
-          bulkInput.classList.add("hidden");
-          resultBox.classList.add("hidden");
+      if (!input) return alert("Masukkan link terlebih dahulu!");
+
+      const links = input.split("\n").map(l => l.trim()).filter(l => l);
+      overlay.classList.add("show");
+
+      try {
+        if (links.length === 1) {
+          // SINGLE MODE
+          const link = links[0];
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(link)}`;
+          const response = await fetch(qrUrl);
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+
+          const img = document.createElement("img");
+          img.src = url;
+          qrContainer.appendChild(img);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `qr_${Math.random().toString(36).substring(2,8)}.png`;
+          a.textContent = "Unduh PNG";
+          a.style.display = "block";
+          a.style.marginTop = "10px";
+          qrContainer.appendChild(a);
+
+          // Auto download
+          a.click();
+
         } else {
-          singleInput.classList.add("hidden");
-          bulkInput.classList.remove("hidden");
-          resultBox.classList.add("hidden");
+          // BULK MODE
+          const zip = new JSZip();
+          let count = 0;
+
+          for (const link of links) {
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(link)}`;
+            const response = await fetch(qrUrl);
+            const blob = await response.blob();
+            const filename = `qr_${Math.random().toString(36).substring(2,8)}.png`;
+            zip.file(filename, blob);
+            count++;
+          }
+
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          saveAs(zipBlob, `QR_Batch_${Date.now()}.zip`);
         }
-      });
-    });
-
-    document.getElementById("generateBtn").addEventListener("click", async () => {
-      const mode = document.querySelector("input[name='mode']:checked").value;
-      loader.style.display = "flex";
-
-      if (mode === "single") {
-        const link = document.getElementById("linkInput").value.trim();
-        if (!link) {
-          loader.style.display = "none";
-          return alert("Masukkan link dulu ya!");
-        }
-
-        const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(link)}`;
-        try {
-          const response = await fetch(qrURL);
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          const randomName = "QR_" + Math.random().toString(36).substring(2, 8) + ".png";
-
-          const qrImg = document.getElementById("qrImage");
-          qrImg.src = blobUrl;
-
-          const downloadLink = document.getElementById("downloadLink");
-          downloadLink.href = blobUrl;
-          downloadLink.download = randomName;
-
-          resultBox.classList.remove("hidden");
-        } catch (err) {
-          alert("Gagal membuat QR!");
-          console.error(err);
-        }
-        loader.style.display = "none";
-
-      } else {
-        const file = document.getElementById("fileInput").files[0];
-        if (!file) {
-          loader.style.display = "none";
-          return alert("Pilih file .txt dulu.");
-        }
-
-        const text = await file.text();
-        const links = text.split(/\r?\n/).filter(l => l.trim() !== "");
-        if (links.length === 0) {
-          loader.style.display = "none";
-          return alert("File tidak berisi link.");
-        }
-
-        const zip = new JSZip();
-        let i = 1;
-        for (const link of links) {
-          const encoded = encodeURIComponent(link.trim());
-          const qrURL = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encoded}`;
-          const response = await fetch(qrURL);
-          const blob = await response.blob();
-          zip.file(`qr_${i++}_${Math.random().toString(36).substring(2, 8)}.png`, blob);
-        }
-
-        const zipBlob = await zip.generateAsync({ type: "blob" });
-        saveAs(zipBlob, "QR_Bulk_" + Date.now() + ".zip");
-        loader.style.display = "none";
-        alert("✅ ZIP berhasil dibuat dan diunduh!");
+      } catch (e) {
+        alert("Terjadi kesalahan: " + e.message);
+      } finally {
+        overlay.classList.remove("show");
       }
-    });
+    }
   </script>
 </body>
 </html>
